@@ -87,7 +87,24 @@ app.get('/productcatagorys', async (req, res) => {
 })
 app.get('/productcatagory/:id', async (req, res) => {
     const { id } = req.params
-    const quary = { id: id }
+    const quary = { _id: ObjectId(id) }
+    try {
+        const result = await ProductCatagorysCollection.find(quary).toArray()
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+app.get('/usephoneServices', async (req, res) => {
+    const catagory = req.query.catagory;
+    const quary = { catogory: catagory }
     try {
         const result = await ProductCatagoryServiceCollection.find(quary).toArray()
         res.send({
@@ -103,6 +120,23 @@ app.get('/productcatagory/:id', async (req, res) => {
     }
 })
 
+//add used phone to data base
+app.post('/addusedproduct', async (req, res) => {
+    const phoneDetail = req.body;
+    try {
+        const result = await ProductCatagoryServiceCollection.insertOne(phoneDetail)
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
 
 // ProductCatagorys
 
