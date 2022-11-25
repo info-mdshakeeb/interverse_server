@@ -193,4 +193,27 @@ app.get('/myproducts', async (req, res) => {
     }
 })
 
+app.put('/usephoneServices/update/:id', async (req, res) => {
+    const { id } = req.params;
+    const filter = { _id: ObjectId(id) }
+    const updateDoc = {
+        $set: {
+            available: req.body.available
+        }
+    }
+    try {
+        const result = await ProductCatagoryServiceCollection.updateOne(filter, updateDoc)
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 app.listen(port, () => console.log(port, "- port is open"))
