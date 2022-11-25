@@ -2,6 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const verifytoken = require('./verifytoken');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT
@@ -36,14 +37,23 @@ const ProductCatagorysCollection = client.db('Interverse').collection('productca
 const ProductCatagoryServiceCollection = client.db('Interverse').collection('productcatagoryservice');
 const ProductBookingCollection = client.db('Interverse').collection('bookings');
 
-app.post('/users', async (req, res) => {
+app.put('/users/:email', async (req, res) => {
+    const { email } = req.params;
     const user = req.body;
+    const filter = { email: email }
+    const options = { upsert: true }
+    const updateDoc = {
+        $set: user
+    }
     // console.log(user);
     try {
-        const result = await UserCollention.insertOne(user)
+        const result = await UserCollention.updateOne(filter, updateDoc, options)
+        const token = jwt.sign(user, process.env.ACCSEE_SECRET_TOKEN, {
+            expiresIn: '7d'
+        })
         res.send({
             success: true,
-            data: result
+            data: { result, token }
         })
     } catch (error) {
         console.log(error.name, error.message)
