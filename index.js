@@ -121,7 +121,7 @@ app.get('/usephoneServices', async (req, res) => {
     }
 })
 
-//add used phone to data base
+//add used phone to database
 app.post('/addusedproduct', async (req, res) => {
     const phoneDetail = req.body;
     try {
@@ -162,6 +162,24 @@ app.get('/mybooking', async (req, res) => {
     const quary = { buyerEmail: email }
     try {
         const result = await ProductBookingCollection.find(quary).toArray()
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+app.get('/myproducts', async (req, res) => {
+    const email = req.query.email;
+
+    const quary = { sellerEmail: email }
+    try {
+        const result = await ProductCatagoryServiceCollection.find(quary).toArray()
         res.send({
             success: true,
             data: result
