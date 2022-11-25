@@ -156,4 +156,23 @@ app.post('/bookings', async (req, res) => {
     }
 })
 
+app.get('/mybooking', async (req, res) => {
+    const email = req.query.email;
+
+    const quary = { buyerEmail: email }
+    try {
+        const result = await ProductBookingCollection.find(quary).toArray()
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 app.listen(port, () => console.log(port, "- port is open"))
