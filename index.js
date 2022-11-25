@@ -34,6 +34,7 @@ mongodb()
 const UserCollention = client.db('Interverse').collection('users');
 const ProductCatagorysCollection = client.db('Interverse').collection('productcatagorys');
 const ProductCatagoryServiceCollection = client.db('Interverse').collection('productcatagoryservice');
+const ProductBookingCollection = client.db('Interverse').collection('bookings');
 
 app.post('/users', async (req, res) => {
     const user = req.body;
@@ -138,7 +139,21 @@ app.post('/addusedproduct', async (req, res) => {
     }
 })
 
-// ProductCatagorys
-
+app.post('/bookings', async (req, res) => {
+    const bookingsDetails = req.body;
+    try {
+        const result = await ProductBookingCollection.insertOne(bookingsDetails)
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
 
 app.listen(port, () => console.log(port, "- port is open"))
