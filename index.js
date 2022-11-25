@@ -238,5 +238,24 @@ app.put('/usephoneServices/publish/:id', async (req, res) => {
         })
     }
 })
+//get ad :
+app.get('/advertises', async (req, res) => {
+    const available = req.query.available;
+    const type = req.query.type;
+    const quary = { available: available, type: type }
+    try {
+        const result = await ProductCatagoryServiceCollection.find(quary).toArray()
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
 
 app.listen(port, () => console.log(port, "- port is open"))
