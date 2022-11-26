@@ -41,10 +41,10 @@ const ProductBookingCollection = client.db('Interverse').collection('bookings');
 async function verifyAdminSeller(req, res, next) {
     const email = req.user?.email;
     const query = { email: email }
-    console.log(email);
+    // console.log(email);
     try {
         const user = await UserCollention.findOne(query)
-        console.log(user);
+        // console.log(user);
         if (user?.role === 'admin') {
             return next()
         } else if (user?.role == 'seller') {
@@ -106,6 +106,24 @@ app.put('/users/:email', async (req, res) => {
         res.send({
             success: true,
             data: { result, token }
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+app.get('/admin/users', async (req, res) => {
+    const { role } = req.query
+    // console.log(role);
+    const quary = { role }
+    try {
+        const users = await UserCollention.find(quary).toArray()
+        res.send({
+            success: true,
+            data: users
         })
     } catch (error) {
         console.log(error.name, error.message)
@@ -199,7 +217,6 @@ app.post('/addusedproduct', verifytoken, verifyAdminSeller, async (req, res) => 
         })
     }
 })
-
 app.post('/bookings', async (req, res) => {
     const bookingsDetails = req.body;
     try {
@@ -216,7 +233,6 @@ app.post('/bookings', async (req, res) => {
         })
     }
 })
-
 app.get('/mybooking', async (req, res) => {
     const email = req.query.email;
 
@@ -316,6 +332,48 @@ app.get('/advertises', async (req, res) => {
             success: false,
             message: error.message
         })
+    }
+})
+app.put('/user/admin/vf/:id', async (req, res) => {
+    const { id } = req.params;
+    const filter = { _id: ObjectId(id) }
+    const options = { upsert: true }
+    const updateDoc = {
+        $set: {
+            type: req.body.type
+        }
+    }
+    try {
+        const result = await UserCollention.updateOne(filter, updateDoc, options)
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+app.delete('/user/admin/delete/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await UserCollention.deleteOne({ _id: ObjectId(id) });
+        res.send(
+            {
+                succerss: true,
+            }
+        )
+    } catch (error) {
+        console.log(error.name, error.message);
+        res.send(
+            {
+                succerss: false,
+                message: "Delate item faild"
+            }
+        )
     }
 })
 
