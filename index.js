@@ -60,6 +60,35 @@ async function verifyAdminSeller(req, res, next) {
         console.log(error.name, "--", error.message)
     }
 }
+app.get('/user/admin/:email', async (req, res) => {
+    const { email } = req.params
+    const query = { email: email }
+    try {
+        const user = await UserCollention.findOne(query)
+
+        res.send({ isAdmin: user?.role === 'admin' })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+app.get('/user/seller/:email', async (req, res) => {
+    const { email } = req.params
+    const query = { email: email }
+    try {
+        const user = await UserCollention.findOne(query)
+        res.send({ isSeller: user?.role === 'seller' })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
 app.put('/users/:email', async (req, res) => {
     const { email } = req.params;
     const user = req.body;
@@ -153,7 +182,6 @@ app.get('/usephoneServices', async (req, res) => {
         })
     }
 })
-
 //add used phone to database
 app.post('/addusedproduct', verifytoken, verifyAdminSeller, async (req, res) => {
     const phoneDetail = req.body;
