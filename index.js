@@ -37,6 +37,29 @@ const ProductCatagorysCollection = client.db('Interverse').collection('productca
 const ProductCatagoryServiceCollection = client.db('Interverse').collection('productcatagoryservice');
 const ProductBookingCollection = client.db('Interverse').collection('bookings');
 
+//verify admin seller for add product :
+async function verifyAdminSeller(req, res, next) {
+    const email = req.user?.email;
+    const query = { email: email }
+    console.log(email);
+    try {
+        const user = await UserCollention.findOne(query)
+        console.log(user);
+        if (user?.role === 'admin') {
+            return next()
+        } else if (user?.role == 'seller') {
+            return next()
+        }
+        else {
+            res.send({
+                success: false,
+                data: 'Unauthenticated'
+            })
+        }
+    } catch (error) {
+        console.log(error.name, "--", error.message)
+    }
+}
 app.put('/users/:email', async (req, res) => {
     const { email } = req.params;
     const user = req.body;
@@ -132,7 +155,7 @@ app.get('/usephoneServices', async (req, res) => {
 })
 
 //add used phone to database
-app.post('/addusedproduct', async (req, res) => {
+app.post('/addusedproduct', verifytoken, verifyAdminSeller, async (req, res) => {
     const phoneDetail = req.body;
     try {
         const result = await ProductCatagoryServiceCollection.insertOne(phoneDetail)
