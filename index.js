@@ -6,14 +6,13 @@ const verifytoken = require('./verifytoken');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT
+const stripe = require("stripe")(process.env.STRIPE_KEY);
 
 //middelware :
 app.use(cors());
 app.use(express.json());
-
 //chack :
 app.get('/text', (req, res) => res.send('node is open'))
-
 //database connect :
 const uri = `mongodb+srv://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@cluster-skv.zmdghy4.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -30,13 +29,12 @@ const mongodb = () => {
     }
 }
 mongodb()
-
 //all Collentions :
 const UserCollention = client.db('Interverse').collection('users');
 const ProductCatagorysCollection = client.db('Interverse').collection('productcatagorys');
 const ProductCatagoryServiceCollection = client.db('Interverse').collection('productcatagoryservice');
 const ProductBookingCollection = client.db('Interverse').collection('bookings');
-
+const ProductReportCollection = client.db('Interverse').collection('reported-data');
 //verify admin seller for add product :
 async function verifyAdminSeller(req, res, next) {
     const email = req.user?.email;
@@ -376,5 +374,84 @@ app.delete('/user/admin/delete/:id', async (req, res) => {
         )
     }
 })
+
+app.get('/admin/:email', async (req, res) => {
+    const { email } = req.params;
+    const quary = { email }
+    try {
+        const result = await UserCollention.find(quary).toArray()
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+//report :
+app.post('/user/admin/report', async (req, res) => {
+    const ReportData = req.body;
+    try {
+        const result = await ProductReportCollection.insertOne(ReportData)
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+app.get('/reports', async (req, res) => {
+    try {
+        const result = await ProductReportCollection.find({}).toArray()
+        res.send({
+            success: true,
+            data: result
+        })
+
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+//payment :
+
+app.post("/create-payment-intent", async (req, res) => {
+    const booking = req.body;
+    const price = booking.price
+    const amount = price * 100;
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            currency: "usd",
+            amount,
+            'payment_method_types': [
+                'card'
+            ]
+        });
+        res.send({
+            clientSecret: paymentIntent.client_secret
+        });
+
+    } catch (error) {
+        console.log(error.name, error.message)
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 
 app.listen(port, () => console.log(port, "- port is open"))
