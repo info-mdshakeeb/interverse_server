@@ -7,12 +7,11 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT
 const stripe = require("stripe")(process.env.STRIPE_KEY);
-
 //middelware :
 app.use(cors());
 app.use(express.json());
 //chack :
-app.get('/text', (req, res) => res.send('node is open'))
+app.get('/', (req, res) => res.send('node is open'))
 //database connect :
 const uri = `mongodb+srv://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@cluster-skv.zmdghy4.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -164,6 +163,7 @@ app.get('/productcatagorys', async (req, res) => {
         })
     }
 })
+
 app.get('/productcatagory/:id', async (req, res) => {
     const { id } = req.params
     const quary = { _id: ObjectId(id) }
@@ -374,7 +374,6 @@ app.delete('/user/admin/delete/:id', async (req, res) => {
         )
     }
 })
-
 app.get('/admin/:email', async (req, res) => {
     const { email } = req.params;
     const quary = { email }
@@ -409,7 +408,6 @@ app.post('/user/admin/report', async (req, res) => {
         })
     }
 })
-
 app.get('/reports', async (req, res) => {
     try {
         const result = await ProductReportCollection.find({}).toArray()
@@ -427,7 +425,6 @@ app.get('/reports', async (req, res) => {
     }
 })
 //payment :
-
 app.post("/create-payment-intent", async (req, res) => {
     const booking = req.body;
     const price = booking.price
@@ -452,7 +449,6 @@ app.post("/create-payment-intent", async (req, res) => {
         })
     }
 })
-
 app.put('/user/payment/:id', async (req, res) => {
     const { id } = req.params;
     const filter = { _id: ObjectId(id) }
@@ -475,6 +471,5 @@ app.put('/user/payment/:id', async (req, res) => {
         })
     }
 })
-
 
 app.listen(port, () => console.log(port, "- port is open"))
